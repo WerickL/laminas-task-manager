@@ -1,4 +1,7 @@
 <?php
+
+use Laminas\Router\Http\Segment;
+
 return [
     'service_manager' => [
         'factories' => [
@@ -17,13 +20,13 @@ return [
     ],
     'router' => [
         'routes' => [
-            'get-all-tasks' => [
-                'type' => 'literal',
+            'get-tasks' => [
+                'type' => Segment::class,
                 'options' => [
-                    'route' => '/task/get-all',
+                    'route' => '/task[/:id][/]',
                     'defaults' => [
                         'controller' => 'Api\\Controller\\Task',
-                        'action' => 'getAll',
+                        'action' => 'getTasks',
                     ],
                 ],
             ],

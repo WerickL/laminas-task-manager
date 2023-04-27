@@ -8,6 +8,7 @@ use Api\Model\Task;
 use Doctrine\ORM\EntityManager;
 use DateTime;
 use Exception;
+use Laminas\Http\PhpEnvironment\Response;
 
 class TaskController extends AbstractActionController
 {
@@ -21,10 +22,17 @@ class TaskController extends AbstractActionController
     {
         
     }
-    public function getAllAction(){
+    public function getTasksAction(){
         $entityManager = $this->entityManager;
         $repository = $entityManager->getRepository(Task::class);
         //print_r($repository->findAll());
+        $request = $this->getEvent()->getRouteMatch();
+        $fields = $request->getParams();
+        //$fields =json_decode($fields, true);
+       //return new JsonModel((array) $params);
+        if(isset($fields["id"])){
+            return $this->getTaskBy(["id"=>$fields["id"]]);
+        }
         $list = $repository->findAll();
         $payload = [];
         foreach($list as $index => $entity){
@@ -35,23 +43,23 @@ class TaskController extends AbstractActionController
     }
     public function getByAction(){
         $request = $this->getRequest();
-        $fields = $request->getContent();
-        $fields =json_decode($fields, true);
-        $entityManager = $this->entityManager;
-        $repository = $entityManager->getRepository(Task::class);
-        $data =  $repository->findBy([
-            $fields["field"]=>$fields["value"]
-        ]);
-       $payload = [];
-       foreach($data as $index => $entity){
-        $payload[] = $entity->toArray();
-    }
-        return new JsonModel($payload);
-    }
+        if($request->isPost()){
+            $fields = $request->getContent();
+            $fields =json_decode($fields, true);
+            return $this->getTaskBy($fields);
+        }else{
+            $response = new Response();
+            $response->setStatusCode(405);
+            $response->setReasonPhrase('Metodo Nao Permitido');
+            return $response;
+        }
+
+    } 
+
     public function createTaskAction(){
         $request = $this->getRequest();
         $fields = $request->getContent();
-        $fields =json_decode($fields, true);
+        $fields = json_decode($fields, true);
         if(empty($fields) || empty($fields["nome"])){
             throw new Exception("Parâmetros inválidos");
         }
@@ -86,5 +94,15 @@ class TaskController extends AbstractActionController
         $response->setStatusCode(201);
         $response->setContent(json_encode($task->toArray()));
         return $response;
+    }
+    private function getTaskBy($fields){
+        $entityManager = $this->entityManager;
+        $repository = $entityManager->getRepository(Task::class);
+        $data =  $repository->findBy($fields);
+       $payload = [];
+       foreach($data as $index => $entity){
+            $payload[] = $entity->toArray();
+        }
+        return new JsonModel($payload);
     }
 }
