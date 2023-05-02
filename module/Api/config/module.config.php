@@ -28,11 +28,6 @@ return [
                 'type' => Segment::class,
                 'options' => [
                     'route' => '/task[/:id][/]',
-                    'allowed_methods' => ['GET'],
-                    'constraints' => [
-                        'methods' => ['GET'],
-                        'verb' => 'get',
-                    ],
                     'defaults' => [
                         'controller' => 'Api\\Controller\\Task',
                         'action' => 'getTasks',
@@ -59,10 +54,11 @@ return [
                         ],
                     ],
                 ],
-            ],'create-task' => [
+            ],
+            'create-task' => [
                 'type' => Method::class,
                 'options' => [
-                    'route' => '/task',
+                    'route' => '/task/create',
                     'verb' => 'post',
                     'defaults' => [
                         'controller' => 'Api\\Controller\\Task',
@@ -80,31 +76,32 @@ return [
                         ],
                     ],
                 ],
-            ],'delete-task' => [
-                'type' => "literal",
+            ],
+            'delete-task' => [
+                'type' => Segment::class,
                 'options' => [
-                    'route' => '/task[/:id]',
+                    'route' => '/task/delete[/:id]',
                     'verb' => 'delete',
                     'defaults' => [
                         'controller' => 'Api\\Controller\\Task',
                         'action' => 'deleteTask',
                     ],
                 ],
-            ],'update-task' => [
-                'type' => Method::class,
+            ],'
+            update-task' => [
+                'type' => Segment::class,
                 'options' => [
-                    'route' => '/task/:id',
-                    'verb' => 'patch',
+                    'route' => '/task/update',
                     'defaults' => [
                         'controller' => 'Api\\Controller\\Task',
                         'action' => 'updateTask',
-                    ], 
+                    ],
                     'may_terminate' => true,
                     'child_routes' => [
                         'process' => [
                             'type' => 'Request',
                             'options' => [
-                                'methods' => ['POST'],
+                                'methods' => ['PATCH'],
                                 'handler' => RequestHandler::class,
                                 'content_type' => ['application/json'],
                             ],

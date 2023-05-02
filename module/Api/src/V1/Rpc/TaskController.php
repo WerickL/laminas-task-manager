@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManager;
 use DateTime;
 use Exception;
 use Api\Entities\Ientity;
+use Laminas\Config\Reader\Json;
 use Laminas\Http\PhpEnvironment\Response;
 use Laminas\Http\Response as HttpResponse;
 
@@ -114,18 +115,20 @@ class TaskController extends AbstractActionController
         $entityManager = $this->entityManager;
         $respository = $entityManager->getRepository(get_class($this->entity));
         $response = new HttpResponse;
-        if(empty($queryParams["id"]) || empty($respository->find($queryParams["id"]))){
+        $task = $respository->find($queryParams["id"]);
+        if(empty($queryParams["id"]) || empty($task)){
             $response->setStatusCode(404);
             $response->setReasonPhrase("Recurso não encontrado");
         }else{
-            $task = $respository->delete($queryParams["id"]);
+            $entityManager->remove($task);
+            $entityManager->flush();
             $response->setStatusCode(200);
             $response->setReasonPhrase("Task deleted");
         }
         return $response;
         
     }
-    public function updateTask(){
+    public function updateTaskAction(){
         $request = $this->getRequest();
         $fields = $request->getContent();
         $fields = json_decode($fields, true);
@@ -137,5 +140,28 @@ class TaskController extends AbstractActionController
         $entityManager = $this->entityManager;
         $respository = $entityManager->getRepository(get_class($this->entity));
         $task = $respository->find($fields["id"]);
+        foreach ($fields as $index => $value){
+            switch ($index) {
+                case 'status':
+                    $task->setStatus($value);
+                    break;
+                case 'nome':
+                    $task->setNome($value);
+                    break;
+                case 'detalhes':
+                    $task->setDetalhes($value);
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+        }
+        $entityManager->flush();
+        unset($task);
+        $response->setStatusCode(201);
+        $response->setReasonPhrase("sucess");
+        $response->setContent(json_encode($task->ToArray()));
+        return $response;
     }
 }
