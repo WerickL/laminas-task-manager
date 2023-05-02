@@ -1,16 +1,18 @@
 <?php
 
-namespace Api\Model;
+namespace Api\Entities;
 use DateTime;
 use DateTimeZone;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\GeneratedValue;
+use Api\Entities\IEntity;
+
 /**
  * @Entity
  */
-class Task
+class Task implements IEntity
 {
     /**
      * @Id
@@ -48,9 +50,9 @@ class Task
      */
     private string $detalhes;
 
-    public function __construct(string $nome)
+    public function __construct(string $nome = null)
     {
-        $this->setNome($nome);
+        empty($nome)? :$this->setNome($nome);
         $this->dataDeCadastro = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
     }
     

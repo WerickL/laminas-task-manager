@@ -1,5 +1,8 @@
 <?php
 
+use Api\Entities\Task;
+use Doctrine\ORM\Query\AST\Literal;
+use Laminas\Router\Http\Method;
 use Laminas\Router\Http\Segment;
 
 return [
@@ -14,16 +17,22 @@ return [
             //'Api\\Rest\\Controller\\Task' => Closure::fromCallable(array()),
             'Api\\Controller\\Task' => function($container) {
                 $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
-                return new Api\V1\Rpc\TaskController($entityManager);
+                $entity = new Task();
+                return new Api\V1\Rpc\TaskController($entityManager, $entity);
             },
         ],
     ],
     'router' => [
         'routes' => [
-            'get-tasks' => [
+            'tasks' => [
                 'type' => Segment::class,
                 'options' => [
                     'route' => '/task[/:id][/]',
+                    'allowed_methods' => ['GET'],
+                    'constraints' => [
+                        'methods' => ['GET'],
+                        'verb' => 'get',
+                    ],
                     'defaults' => [
                         'controller' => 'Api\\Controller\\Task',
                         'action' => 'getTasks',
@@ -51,13 +60,45 @@ return [
                     ],
                 ],
             ],'create-task' => [
-                'type' => 'literal',
+                'type' => Method::class,
                 'options' => [
-                    'route' => '/task/create',
+                    'route' => '/task',
+                    'verb' => 'post',
                     'defaults' => [
                         'controller' => 'Api\\Controller\\Task',
                         'action' => 'createTask',
                     ],
+                    'may_terminate' => true,
+                    'child_routes' => [
+                        'process' => [
+                            'type' => 'Request',
+                            'options' => [
+                                'methods' => ['POST'],
+                                'handler' => RequestHandler::class,
+                                'content_type' => ['application/json'],
+                            ],
+                        ],
+                    ],
+                ],
+            ],'delete-task' => [
+                'type' => "literal",
+                'options' => [
+                    'route' => '/task[/:id]',
+                    'verb' => 'delete',
+                    'defaults' => [
+                        'controller' => 'Api\\Controller\\Task',
+                        'action' => 'deleteTask',
+                    ],
+                ],
+            ],'update-task' => [
+                'type' => Method::class,
+                'options' => [
+                    'route' => '/task/:id',
+                    'verb' => 'patch',
+                    'defaults' => [
+                        'controller' => 'Api\\Controller\\Task',
+                        'action' => 'updateTask',
+                    ], 
                     'may_terminate' => true,
                     'child_routes' => [
                         'process' => [

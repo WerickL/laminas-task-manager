@@ -13,3 +13,18 @@ passwd root
 su
 composer require symfony/cache:*
 exit
+exit
+ocker-php-ext-enable pdo_mysql]
+docker-php-ext-enable pdo_mysql
+docker-php-ext-install pdo_mysql
+su
+sudo docker-php-ext-install pdo_mysql
+php -i
+docker-php-ext-enable mysqli  pdo_mysql pdo
+clear
+docker-php-ext-enable mysqli  pdo_mysql pdo
+docker-php-ext-enable  pdo_mysql pdo
+clear
+docker-php-ext-install mysqli pdo_mysql pdo && docker-php-ext-enable mysqli  pdo_mysql pdo
+docker ps
+exit
